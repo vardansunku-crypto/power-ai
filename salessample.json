@@ -1,0 +1,8 @@
+{
+  "customer_name": "Akhil",
+  "product_name": "Laptop",
+  "category": "Electronics",
+  "quantity": 2,
+  "price": 50000,
+  "city": "Hyderabad"
+}

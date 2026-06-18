@@ -1,0 +1,78 @@
+.main {
+    background-color: #0f172a;
+}
+
+h1, h2, h3 {
+    color: #38bdf8;
+}
+
+.stMetric {
+    background-color: #111827;
+    padding: 18px;
+    border-radius: 14px;
+    border: 1px solid #334155;
+}
+
+.stButton > button {
+    background-color: #2563eb;
+    color: white;
+    border-radius: 10px;
+    border: none;
+    padding: 10px 20px;
+    font-weight: 600;
+}
+
+.stButton > button:hover {
+    background-color: #1d4ed8;
+    color: white;
+}
+
+[data-testid="stSidebar"] {
+    background-color: #020617;
+}
+
+[data-testid="stSidebar"] * {
+    color: white;
+}
+section[data-testid="stSidebar"] {
+    border-right: 1px solid #334155;
+}
+
+.sidebar-title {
+    font-size: 28px;
+    font-weight: bold;
+    color: #38bdf8;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.sidebar-subtitle {
+    text-align: center;
+    color: #94a3b8;
+    margin-bottom: 30px;
+}
+[data-testid="stSidebarNav"] {
+    background-color: #020617;
+    padding-top: 20px;
+}
+
+[data-testid="stSidebarNav"]::before {
+    content: "🚀 Navigation";
+    margin-left: 20px;
+    font-size: 22px;
+    font-weight: bold;
+    color: #38bdf8;
+    margin-bottom: 20px;
+    display: block;
+}
+
+.block-container {
+    padding-top: 2rem;
+}
+
+div[data-testid="metric-container"] {
+    background-color: #111827;
+    border: 1px solid #334155;
+    padding: 15px;
+    border-radius: 12px;
+}

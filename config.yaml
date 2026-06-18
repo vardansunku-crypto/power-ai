@@ -1,0 +1,10 @@
+credentials:
+  usernames:
+    admin:
+      name: Company Admin
+      password: your_existing_password_or_hashed_password
+      role: admin
+    akhil123:
+      name: akhil
+      password: $2b$12$WiRkMx4.0.UtID5BA8QunOCtRduv8uycehBELpB17r7fjD3o/oXYK
+      role: manager
