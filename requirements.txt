@@ -31,7 +31,6 @@ itsdangerous==2.2.0
 Jinja2==3.1.6
 jiter==0.14.0
 MarkupSafe==3.0.3
-mysqlclient==2.2.8
 numpy==2.4.2
 openai==2.36.0
 pandas==3.0.3
