@@ -2,3 +2,6 @@
 venv/
 __pycache__/
 *.pyc
+echo .env>>.gitignore
+echo *.env>>.gitignore
+echo .streamlit/secrets.toml>>.gitignore
