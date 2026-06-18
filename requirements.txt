@@ -10,5 +10,7 @@ openpyxl==3.1.5
 requests==2.32.3
 cryptography==43.0.3
 fpdf==1.7.2
-PyYAML
-streamlit-authenticator
+PyYAML==6.0.2
+python-dotenv==1.0.1
+bcrypt==4.2.0
+streamlit-authenticator==0.3.3
