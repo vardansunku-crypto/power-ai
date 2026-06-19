@@ -1,9 +1,15 @@
 from sqlalchemy import create_engine, inspect
 
 
-def get_mysql_engine(mysql_user, mysql_password, mysql_host, selected_db):
+def get_mysql_engine(
+    mysql_user,
+    mysql_password,
+    mysql_host,
+    mysql_port,
+    selected_db
+):
     engine = create_engine(
-        f"mysql+pymysql://{mysql_user}:{mysql_password}@{mysql_host}/{selected_db}"
+        f"mysql+pymysql://{mysql_user}:{mysql_password}@{mysql_host}:{mysql_port}/{selected_db}"
     )
 
     return engine
