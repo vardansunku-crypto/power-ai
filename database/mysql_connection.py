@@ -36,3 +36,5 @@ def get_database_schema(engine):
 """
 
     return schema_text
+
+    return schema_text
