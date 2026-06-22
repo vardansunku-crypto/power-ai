@@ -259,6 +259,7 @@ defaults = {
     "mysql_connected": False,
     "mysql_engine": None,
     "mysql_host": "localhost",
+    "mysql_port": "3306",
     "mysql_user": "root",
     "mysql_password": "",
     "selected_db": "power_ai",
@@ -318,28 +319,36 @@ if not st.session_state.mysql_connected:
 
     with st.form("mysql_connection_form"):
 
-        col1, col2, col3, col4 = st.columns(4)
+        col1, col2, col3, col4, col5 = st.columns(5)
 
         with col1:
             mysql_host = st.text_input(
                 "MySQL Host",
-                value=st.session_state.mysql_host
+                value=st.session_state.mysql_host,
+                placeholder="localhost or online host"
             )
 
         with col2:
+            mysql_port = st.text_input(
+                "Port",
+                value=st.session_state.mysql_port,
+                placeholder="3306"
+            )
+
+        with col3:
             mysql_user = st.text_input(
                 "MySQL Username",
                 value=st.session_state.mysql_user
             )
 
-        with col3:
+        with col4:
             mysql_password = st.text_input(
                 "MySQL Password",
                 type="password",
                 value=st.session_state.mysql_password
             )
 
-        with col4:
+        with col5:
             selected_db = st.text_input(
                 "Database Name",
                 value=st.session_state.selected_db
@@ -353,6 +362,7 @@ if not st.session_state.mysql_connected:
                 mysql_user,
                 mysql_password,
                 mysql_host,
+                mysql_port,
                 selected_db
             )
 
@@ -360,6 +370,7 @@ if not st.session_state.mysql_connected:
 
             st.session_state.mysql_engine = engine
             st.session_state.mysql_host = mysql_host
+            st.session_state.mysql_port = mysql_port
             st.session_state.mysql_user = mysql_user
             st.session_state.mysql_password = mysql_password
             st.session_state.selected_db = selected_db
@@ -392,6 +403,7 @@ try:
             st.session_state.mysql_user,
             st.session_state.mysql_password,
             st.session_state.mysql_host,
+            st.session_state.mysql_port,
             st.session_state.selected_db
         )
 
@@ -413,7 +425,7 @@ with st.container(key="db_toolbar"):
             ◫ DATABASE ANALYTICS
             <span>CONNECTED</span>
             &nbsp; | &nbsp; DB: {st.session_state.selected_db}
-            &nbsp; | &nbsp; HOST: {st.session_state.mysql_host}
+            &nbsp; | &nbsp; HOST: {st.session_state.mysql_host}:{st.session_state.mysql_port}
         </div>
         """,
         unsafe_allow_html=True
@@ -482,7 +494,7 @@ if disconnect_clicked:
 if st.session_state.show_change_db_form:
     with st.form("change_mysql_connection_form"):
 
-        col1, col2, col3, col4 = st.columns(4)
+        col1, col2, col3, col4, col5 = st.columns(5)
 
         with col1:
             new_mysql_host = st.text_input(
@@ -492,13 +504,20 @@ if st.session_state.show_change_db_form:
             )
 
         with col2:
+            new_mysql_port = st.text_input(
+                "Port",
+                value=st.session_state.mysql_port,
+                key="change_mysql_port"
+            )
+
+        with col3:
             new_mysql_user = st.text_input(
                 "MySQL Username",
                 value=st.session_state.mysql_user,
                 key="change_mysql_user"
             )
 
-        with col3:
+        with col4:
             new_mysql_password = st.text_input(
                 "MySQL Password",
                 type="password",
@@ -506,7 +525,7 @@ if st.session_state.show_change_db_form:
                 key="change_mysql_password"
             )
 
-        with col4:
+        with col5:
             new_selected_db = st.text_input(
                 "Database Name",
                 value=st.session_state.selected_db,
@@ -521,6 +540,7 @@ if st.session_state.show_change_db_form:
                 new_mysql_user,
                 new_mysql_password,
                 new_mysql_host,
+                new_mysql_port,
                 new_selected_db
             )
 
@@ -528,6 +548,7 @@ if st.session_state.show_change_db_form:
 
             st.session_state.mysql_engine = engine
             st.session_state.mysql_host = new_mysql_host
+            st.session_state.mysql_port = new_mysql_port
             st.session_state.mysql_user = new_mysql_user
             st.session_state.mysql_password = new_mysql_password
             st.session_state.selected_db = new_selected_db
