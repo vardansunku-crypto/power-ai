@@ -5,20 +5,46 @@ from dotenv import load_dotenv
 from groq import Groq
 
 
+PRIMARY_MODEL = "llama-3.3-70b-versatile"
+FALLBACK_MODEL = "llama-3.1-8b-instant"
+
+
+def safe_groq_chat(client, prompt):
+    try:
+        response = client.chat.completions.create(
+            model=PRIMARY_MODEL,
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ]
+        )
+        return response.choices[0].message.content
+
+    except Exception as primary_error:
+        try:
+            response = client.chat.completions.create(
+                model=FALLBACK_MODEL,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ]
+            )
+            return response.choices[0].message.content
+
+        except Exception as fallback_error:
+            return f"AI generation failed. Primary error: {primary_error}. Fallback error: {fallback_error}"
+
+
 # -------------------------------------------------
 # AI SUMMARY GENERATOR
 # -------------------------------------------------
 
-def generate_ai_summary(
-    client,
-    title,
-    user_query,
-    dataframe,
-    st
-):
-
+def generate_ai_summary(client, title, user_query, dataframe, st):
     try:
-
         if dataframe is None or dataframe.empty:
             return "No data available for AI summary."
 
@@ -58,24 +84,10 @@ Rules:
 - Focus on trends and business meaning
 """
 
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[
-                {
-                    "role": "user",
-                    "content": summary_prompt
-                }
-            ]
-        )
-
-        ai_summary = response.choices[0].message.content
-
-        return ai_summary
+        return safe_groq_chat(client, summary_prompt)
 
     except Exception as error:
-
         st.error(f"AI Summary Error: {error}")
-
         return "Unable to generate AI summary."
 
 
@@ -83,12 +95,7 @@ Rules:
 # AI COLUMN MAPPING
 # -------------------------------------------------
 
-def get_ai_column_mapping(
-    db_columns,
-    file_columns,
-    client
-):
-
+def get_ai_column_mapping(db_columns, file_columns, client):
     mapping_prompt = f"""
 You are a data integration assistant.
 
@@ -115,18 +122,7 @@ Do not use markdown.
 """
 
     try:
-
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[
-                {
-                    "role": "user",
-                    "content": mapping_prompt
-                }
-            ]
-        )
-
-        mapping_text = response.choices[0].message.content
+        mapping_text = safe_groq_chat(client, mapping_prompt)
 
         mapping_text = mapping_text.replace("```python", "")
         mapping_text = mapping_text.replace("```json", "")
@@ -142,20 +138,14 @@ Do not use markdown.
 
     except Exception:
         return {}
+
+
 # -------------------------------------------------
 # AI SQL AUTO FIX
 # -------------------------------------------------
 
-def fix_sql_with_ai(
-    client,
-    original_sql,
-    error_message,
-    schema_text,
-    user_query
-):
-
+def fix_sql_with_ai(client, original_sql, error_message, schema_text, user_query):
     try:
-
         fix_prompt = f"""
 You are a MySQL SQL expert.
 
@@ -179,45 +169,23 @@ Rules:
 - No markdown
 """
 
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[
-                {
-                    "role": "user",
-                    "content": fix_prompt
-                }
-            ]
-        )
+        fixed_sql = safe_groq_chat(client, fix_prompt)
 
-        fixed_sql = response.choices[0].message.content
-
-        fixed_sql = fixed_sql.replace(
-            "```sql",
-            ""
-        )
-
-        fixed_sql = fixed_sql.replace(
-            "```",
-            ""
-        )
+        fixed_sql = fixed_sql.replace("```sql", "")
+        fixed_sql = fixed_sql.replace("```", "")
 
         return fixed_sql.strip()
 
     except Exception:
-
         return ""
+
+
 # -------------------------------------------------
 # SQL EXPLANATION ENGINE
 # -------------------------------------------------
 
-def explain_sql_with_ai(
-    client,
-    sql_query,
-    user_query
-):
-
+def explain_sql_with_ai(client, sql_query, user_query):
     try:
-
         explanation_prompt = f"""
 You are a business intelligence expert.
 
@@ -237,33 +205,18 @@ Rules:
 - Do not explain SQL syntax
 """
 
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[
-                {
-                    "role": "user",
-                    "content": explanation_prompt
-                }
-            ]
-        )
-
-        return response.choices[0].message.content
+        return safe_groq_chat(client, explanation_prompt)
 
     except Exception:
-
         return "Unable to generate SQL explanation."
+
+
 # -------------------------------------------------
 # AI MERGE COLUMN SUGGESTION
 # -------------------------------------------------
 
-def suggest_merge_columns_with_ai(
-    client,
-    db_columns,
-    file_columns
-):
-
+def suggest_merge_columns_with_ai(client, db_columns, file_columns):
     try:
-
         prompt = f"""
 You are a data integration expert.
 
@@ -287,39 +240,25 @@ Rules:
 - Pick only one best match
 """
 
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ]
-        )
-
-        return response.choices[0].message.content
+        return safe_groq_chat(client, prompt)
 
     except Exception:
-
         return "Unable to suggest merge columns."
+
+
 # -------------------------------------------------
 # PARSE AI MERGE SUGGESTION
 # -------------------------------------------------
 
-def parse_merge_suggestion(
-    suggestion_text
-):
-
+def parse_merge_suggestion(suggestion_text):
     db_column = ""
     file_column = ""
     confidence = ""
 
     try:
-
         lines = suggestion_text.splitlines()
 
         for line in lines:
-
             if line.lower().startswith("database column:"):
                 db_column = line.split(":", 1)[1].strip()
 
@@ -330,10 +269,15 @@ def parse_merge_suggestion(
                 confidence = line.split(":", 1)[1].strip()
 
     except Exception:
-
         pass
 
     return db_column, file_column, confidence
+
+
+# -------------------------------------------------
+# INTENT CLASSIFIER
+# -------------------------------------------------
+
 def classify_user_intent(user_question):
     question = user_question.lower()
 
@@ -375,12 +319,18 @@ def classify_user_intent(user_question):
         return "CHART_REQUEST"
 
     return "SQL_QUERY"
-def generate_recommendation_summary(
-    client,
-    user_question,
-    df
-):
-    prompt = f"""
+
+
+# -------------------------------------------------
+# RECOMMENDATION SUMMARY
+# -------------------------------------------------
+
+def generate_recommendation_summary(client, user_question, df):
+    try:
+        if df is None or df.empty:
+            return "No data available for recommendation."
+
+        prompt = f"""
 You are a Senior Business Intelligence Consultant.
 
 Analyze the business data and provide:
@@ -403,43 +353,27 @@ Data:
 {df.head(50).to_string()}
 """
 
-    try:
-
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ]
-        )
-
-        return response.choices[0].message.content
+        return safe_groq_chat(client, prompt)
 
     except Exception as e:
         return f"Recommendation generation failed: {e}"
+
+
+# -------------------------------------------------
+# GENERAL AI RESPONSE
+# -------------------------------------------------
+
 def generate_ai_response(prompt):
     load_dotenv()
 
     api_key = os.getenv("GROQ_API_KEY")
+
     if not api_key:
         return "Unable to generate AI response: GROQ_API_KEY is not configured."
 
     try:
         client = Groq(api_key=api_key)
-
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ]
-        )
-
-        return response.choices[0].message.content
+        return safe_groq_chat(client, prompt)
 
     except Exception as error:
         return f"AI response generation failed: {error}"
