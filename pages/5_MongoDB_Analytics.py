@@ -226,6 +226,7 @@ st.sidebar.markdown(
 defaults = {
     "mongo_client": None,
     "mongo_df": pd.DataFrame(),
+    "mongo_connection_type": "Local MongoDB",
     "mongo_uri": "mongodb://localhost:27017/",
     "mongo_selected_db": None,
     "mongo_selected_collection": None,
@@ -366,13 +367,36 @@ st.markdown(
 
 st.markdown('<div class="section-title">🔌 MongoDB Connection</div>', unsafe_allow_html=True)
 
+mongo_connection_type = st.radio(
+    "Connection Type",
+    ["Local MongoDB", "MongoDB Atlas"],
+    horizontal=True,
+    key="mongo_connection_type_radio"
+)
+
+st.session_state.mongo_connection_type = mongo_connection_type
+
+if mongo_connection_type == "Local MongoDB":
+    default_uri = "mongodb://localhost:27017/"
+else:
+    if st.session_state.mongo_uri == "mongodb://localhost:27017/":
+        default_uri = ""
+    else:
+        default_uri = st.session_state.mongo_uri
+
 mongo_uri = st.text_input(
     "MongoDB URI",
-    value=st.session_state.mongo_uri,
+    value=default_uri,
+    placeholder="Local: mongodb://localhost:27017/  |  Atlas: mongodb+srv://username:password@cluster.mongodb.net/",
     key="mongo_uri_input"
 )
 
 st.session_state.mongo_uri = mongo_uri
+
+if mongo_connection_type == "MongoDB Atlas":
+    st.info("For MongoDB Atlas, paste your full mongodb+srv URI. Make sure your Atlas Network Access allows Streamlit Cloud.")
+else:
+    st.info("Local MongoDB works only when Power AI is running on your own laptop, not on Streamlit Cloud.")
 
 
 # -------------------------------------------------
@@ -380,15 +404,20 @@ st.session_state.mongo_uri = mongo_uri
 # -------------------------------------------------
 
 if connect_clicked:
-    try:
-        mongo_client = connect_mongodb(mongo_uri)
-        st.session_state.mongo_client = mongo_client
-        st.session_state.mongo_connected = True
-        st.success("MongoDB connected successfully.")
-        st.rerun()
-    except Exception as e:
-        st.session_state.mongo_connected = False
-        st.error(f"MongoDB Connection Error: {e}")
+    if not mongo_uri.strip():
+        st.error("Please enter MongoDB URI.")
+    else:
+        try:
+            mongo_client = connect_mongodb(mongo_uri)
+            st.session_state.mongo_client = mongo_client
+            st.session_state.mongo_connected = True
+            st.session_state.mongo_connection_type = mongo_connection_type
+            st.session_state.mongo_uri = mongo_uri
+            st.success("MongoDB connected successfully.")
+            st.rerun()
+        except Exception as e:
+            st.session_state.mongo_connected = False
+            st.error(f"MongoDB Connection Error: {e}")
 
 
 if clear_clicked:
